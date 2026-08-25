@@ -10,7 +10,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      MONGO_URI: "mongodb://localhost:27017/test_db"
+      MONGO_URI: "mongodb://localhost:27017/myDatabase"
 
     steps:
       - name: Checkout Code
@@ -27,20 +27,16 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest
 
-      - name: Create Environment File
-        run: |
-          echo "MONGO_URI=mongodb://localhost:27017/test_db" > .env
-
       - name: Run Tests
-        env:
-          MONGO_URI: "mongodb://localhost:27017/test_db"
         run: |
           python -m pytest || true
 
       - name: Build Application Package
         run: |
-          tar -czf ../app-build.tar.gz . --exclude='.git' --exclude='.github'
-          mv ../app-build.tar.gz ./app-build.tar.gz
+          mkdir -p build
+          rsync -av --exclude='build' --exclude='.git' --exclude='.github' --exclude='*.tar.gz' ./ build/
+          cd build && tar -czf ../app-build.tar.gz .
+          cd ..
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
