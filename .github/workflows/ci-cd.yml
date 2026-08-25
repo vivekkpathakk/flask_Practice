@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      MONGO_URI: "mongodb://localhost:27017/dummy_db"
 
     steps:
       - name: Checkout Code
