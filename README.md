@@ -68,3 +68,13 @@ To run the GitHub Actions deployment jobs successfully, configure these secrets 
 
 ### GitHub Actions Workflow Execution
 ![GitHub Actions Pipeline Run](screenshots/github_actions.png)
+
+---
+
+## 5. Pipeline Execution Screenshots
+
+### Jenkins Pipeline Execution
+![Jenkins Pipeline Stage View](screenshots/jenkins_pipeline.png)
+
+### GitHub Actions Workflow Execution
+![GitHub Actions Pipeline Run](screenshots/github_actions.png)
