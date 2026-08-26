@@ -58,3 +58,13 @@ To run the GitHub Actions deployment jobs successfully, configure these secrets 
 * `STAGING_HOST`: Target server IP address for staging deployment.
 * `PROD_HOST`: Target server IP address for production deployment.
 * `DEPLOY_KEY`: SSH Private Key (`.pem`) for authenticating deployment actions.
+
+---
+
+## 5. Pipeline Execution Screenshots
+
+### Jenkins Pipeline Execution
+![Jenkins Pipeline Stage View](screenshots/jenkins_pipeline.png)
+
+### GitHub Actions Workflow Execution
+![GitHub Actions Pipeline Run](screenshots/github_actions.png)
