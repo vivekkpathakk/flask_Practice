@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         STAGING_DIR = '/var/www/flask_staging'
+        NOTIFY_EMAIL = 'pathakvivek86252@gmail.com'
     }
 
     stages {
@@ -22,8 +23,7 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    # Run tests if test files exist, fallback cleanly if empty
-                    pytest || echo "No tests found or pytest passed"
+                    pytest -v
                 '''
             }
         }
@@ -32,6 +32,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Deploying application to staging directory..."
+                    mkdir -p $STAGING_DIR
                     rsync -av --exclude='venv' --exclude='.git' ./ $STAGING_DIR/
                 '''
             }
@@ -40,18 +41,28 @@ pipeline {
 
     post {
         success {
-            echo "Build & Deployment Successful!"
-            // Optional: Requires Extended Email Plugin & SMTP configured in Jenkins System Settings
-            /*
-            emailext (
-                subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: "Pipeline finished successfully. View details at: ${env.BUILD_URL}",
-                to: "your-email@example.com"
+            emailext(
+                subject: "SUCCESS: Job '${env.JOB_NAME}' [Build #${env.BUILD_NUMBER}]",
+                body: """Pipeline finished successfully.
+
+Job:     ${env.JOB_NAME}
+Build:   #${env.BUILD_NUMBER}
+Status:  SUCCESS
+Details: ${env.BUILD_URL}""",
+                to: "${env.NOTIFY_EMAIL}"
             )
-            */
         }
         failure {
-            echo "Pipeline failed."
+            emailext(
+                subject: "FAILED: Job '${env.JOB_NAME}' [Build #${env.BUILD_NUMBER}]",
+                body: """Pipeline failed. Check the console output.
+
+Job:     ${env.JOB_NAME}
+Build:   #${env.BUILD_NUMBER}
+Status:  FAILURE
+Details: ${env.BUILD_URL}console""",
+                to: "${env.NOTIFY_EMAIL}"
+            )
         }
     }
 }
