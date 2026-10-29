@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        STAGING_DIR = '/var/www/flask_staging'
         NOTIFY_EMAIL = 'pathakvivek86252@gmail.com'
+        STAGING_DIR  = "${WORKSPACE}/../flask_staging"
     }
 
     stages {
@@ -31,9 +31,9 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 sh '''
-                    echo "Deploying application to staging directory..."
-                    mkdir -p $STAGING_DIR
-                    rsync -av --exclude='venv' --exclude='.git' ./ $STAGING_DIR/
+                    mkdir -p "$STAGING_DIR"
+                    cp -r app.py requirements.txt "$STAGING_DIR"/
+                    echo "Deployed to staging: $STAGING_DIR"
                 '''
             }
         }
