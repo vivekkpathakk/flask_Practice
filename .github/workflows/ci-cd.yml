@@ -9,37 +9,25 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    env:
-      MONGO_URI: "mongodb://localhost:27017/myDatabase"
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
+          cache: pip
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest
-
       - name: Run Tests
-        run: |
-          python -m pytest || true
-
+        run: python -m pytest -v
       - name: Build Application Package
         run: |
           mkdir -p build
-          rsync -av --exclude='build' --exclude='.git' --exclude='.github' --exclude='*.tar.gz' ./ build/
-          cd build && tar -czf ../app-build.tar.gz .
-          cd ..
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+          rsync -av --exclude='build' --exclude='.git' --exclude='.github' ./ build/
+          cd build && tar -czf ../app-build.tar.gz . && cd ..
+      - uses: actions/upload-artifact@v4
         with:
           name: flask-app-build
           path: app-build.tar.gz
@@ -48,26 +36,28 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
+    environment: staging
     steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: flask-app-build
-
       - name: Deploy to Staging
-        run: |
-          echo "Deploying to Staging Server IP: ${{ secrets.STAGING_HOST }}"
+        env:
+          HOST: ${{ secrets.STAGING_HOST }}
+          KEY: ${{ secrets.DEPLOY_KEY }}
+        run: echo "Deploying to staging server $HOST (simulated)"
 
   deploy-production:
     needs: build-and-test
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: flask-app-build
-
       - name: Deploy to Production
-        run: |
-          echo "Deploying to Production Server IP: ${{ secrets.PROD_HOST }}"
+        env:
+          HOST: ${{ secrets.PROD_HOST }}
+          KEY: ${{ secrets.DEPLOY_KEY }}
+        run: echo "Deploying to production server $HOST (simulated)"
